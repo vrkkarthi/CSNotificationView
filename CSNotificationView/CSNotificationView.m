@@ -46,7 +46,19 @@
                textAlignment:(NSTextAlignment)textAlignment
                        image:(UIImage*)image
                      message:(NSString*)message
+                    duration:(NSTimeInterval)duration {
+    [CSNotificationView showInViewController:viewController tintColor:tintColor font:font textAlignment:textAlignment image:image message:message duration:duration belowSubview:nil atOriginY:-1234];
+}
+
++ (void)showInViewController:(UIViewController*)viewController
+                   tintColor:(UIColor*)tintColor
+                        font:(UIFont*)font
+               textAlignment:(NSTextAlignment)textAlignment
+                       image:(UIImage*)image
+                     message:(NSString*)message
                     duration:(NSTimeInterval)duration
+                belowSubview:(UIView *)subview
+                   atOriginY:(float)originY
 {
     NSAssert(message, @"'message' must not be nil.");
     
@@ -57,8 +69,9 @@
     note.textLabel.textAlignment = textAlignment;
     note.textLabel.text = message;
     
-    void (^completion)() = ^{[note setVisible:NO animated:YES completion:nil];};
-    [note setVisible:YES animated:YES completion:^{
+    void (^completion)() = ^{[note setVisible:NO belowSubview:subview atOriginY:originY animated:YES completion:nil];};
+    
+    [note setVisible:YES belowSubview:subview atOriginY:originY animated:YES completion:^{
         double delayInSeconds = duration;
         dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
         dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
@@ -311,7 +324,17 @@
 
 #pragma mark - presentation
 
-- (void)setVisible:(BOOL)visible animated:(BOOL)animated completion:(void (^)())completion
+- (void)setVisible:(BOOL)visible animated:(BOOL)animated completion:(void (^)())completion {
+    UIView *subview = nil;
+    
+    if (self.parentNavigationController) {
+        subview = self.parentNavigationController.navigationBar;
+    }
+    
+    [self setVisible:visible belowSubview:subview atOriginY:-1234 animated:animated completion:completion];
+}
+
+- (void)setVisible:(BOOL)visible belowSubview:(UIView *)subview atOriginY:(float)originY animated:(BOOL)animated completion:(void (^)())completion
 {
     if (_visible != visible) {
         
@@ -323,8 +346,16 @@
         if (!self.superview) {
             self.frame = startFrame;
             
-            if (self.parentNavigationController) {
-                [self.parentNavigationController.view insertSubview:self belowSubview:self.parentNavigationController.navigationBar];
+            if (originY != -1234) {
+                endFrame.origin.y = originY;
+            }
+            
+            if (subview == nil && self.parentNavigationController) {
+                subview = self.parentNavigationController.navigationBar;
+            }
+            
+            if (subview) {
+                [subview.superview insertSubview:self belowSubview:subview];
             } else {
                 [self.parentViewController.view addSubview:self];
             }
