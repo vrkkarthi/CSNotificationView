@@ -41,6 +41,16 @@ typedef void(^CSVoidBlock)();
                      message:(NSString*)message
                     duration:(NSTimeInterval)duration;
 
++ (void)showInViewController:(UIViewController*)viewController
+                   tintColor:(UIColor*)tintColor
+                        font:(UIFont*)font
+               textAlignment:(NSTextAlignment)textAlignment
+                       image:(UIImage*)image
+                     message:(NSString*)message
+                    duration:(NSTimeInterval)duration
+                belowSubview:(UIView *)subview
+                   atOriginY:(float)originY;
+
 #pragma mark + creators
 
 + (CSNotificationView*)notificationViewWithParentViewController:(UIViewController*)viewController
@@ -75,6 +85,7 @@ typedef void(^CSVoidBlock)();
  */
 - (void)setVisible:(BOOL)showing animated:(BOOL)animated completion:(void (^)())completion;
 
+- (void)setVisible:(BOOL)visible belowSubview:(UIView *)subview atOriginY:(float)originY animated:(BOOL)animated completion:(void (^)())completion;
 /**
  * Convenience method to dismiss with a(nother) predefined style and / or message.
  */
